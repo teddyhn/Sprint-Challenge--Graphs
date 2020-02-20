@@ -10,9 +10,9 @@ world = World()
 
 
 # You may uncomment the smaller graphs for development and testing purposes.
-map_file = "maps/test_line.txt"
+# map_file = "maps/test_line.txt"
 # map_file = "maps/test_cross.txt"
-# map_file = "maps/test_loop.txt"
+map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
 # map_file = "maps/main_maze.txt"
 
@@ -48,7 +48,7 @@ def reverse_direction(direction):
 
 last_direction = ''
 
-while len(traversed_rooms) < len(world.rooms):
+while True:
     exits = player.current_room.get_exits()
     print(f'Exits: {exits}')
     room_id = player.current_room.id
@@ -56,34 +56,46 @@ while len(traversed_rooms) < len(world.rooms):
 
     traversed_rooms.add(room_id)
 
-    if len(traversed_rooms) == len(world.rooms):
-        break
-
     for exit in exits:
         if exit not in traversal_graph[room_id]:
             traversal_graph[room_id][exit] = '?'
 
-    valid_dir = False
-    dir_to_travel = ''
-
-    while valid_dir == False:
-        random_dir = exits[random.randint(0, len(exits) - 1)]
-        if traversal_graph[room_id][random_dir] == '?':
-            dir_to_travel = random_dir
-            valid_dir = True
+    if len(traversed_rooms) == len(world.rooms):
+        break
     
-    player.travel(dir_to_travel)
-    traversal_path.append(dir_to_travel)
-    last_direction = dir_to_travel
+    all_explored = True
 
-    next_room_id = player.current_room.id
+    for exit in traversal_graph[room_id]:
+        if traversal_graph[room_id][exit] == '?':
+            all_explored = False
+            break
 
-    traversal_graph[room_id][dir_to_travel] = next_room_id
-    traversal_graph[next_room_id][reverse_direction(dir_to_travel)] = room_id
+    if len(traversed_rooms) < len(world.rooms) and all_explored == True:
+        player.travel(reverse_direction(last_direction))
+        traversal_path.append(reverse_direction(last_direction))
+
+    else:
+        valid_dir = False
+        dir_to_travel = ''
+
+        while valid_dir == False:
+            random_dir = exits[random.randint(0, len(exits) - 1)]
+            if traversal_graph[room_id][random_dir] == '?':
+                dir_to_travel = random_dir
+                valid_dir = True
+        
+        player.travel(dir_to_travel)
+        traversal_path.append(dir_to_travel)
+        last_direction = dir_to_travel
+
+        next_room_id = player.current_room.id
+
+        traversal_graph[room_id][dir_to_travel] = next_room_id
+        traversal_graph[next_room_id][reverse_direction(dir_to_travel)] = room_id
 
 
 print(traversal_graph)
-
+print(traversal_path)
 
 
 # TRAVERSAL TEST
