@@ -12,9 +12,9 @@ world = World()
 # You may uncomment the smaller graphs for development and testing purposes.
 # map_file = "maps/test_line.txt"
 # map_file = "maps/test_cross.txt"
-map_file = "maps/test_loop.txt"
+# map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
-# map_file = "maps/main_maze.txt"
+map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
 room_graph=literal_eval(open(map_file, "r").read())
@@ -33,6 +33,33 @@ traversal_path = []
 
 for i in range(0, (len(world.rooms))):
     traversal_graph[i] = {}
+
+def bfs(current_room):
+    queue = []
+    queue.append([current_room])
+    print('\nStarting breadth-first search...')
+
+    visited = set()
+
+    while len(queue) > 0:
+        path = queue.pop(0)
+        room = path[-1]
+
+        if room not in visited:
+            if '?' in list(traversal_graph[room].values()):
+                path.pop(0)
+                return path
+            visited.add(room)
+
+            exits = list(traversal_graph[room].keys())
+            for exit in exits:
+                if traversal_graph[room][exit] in visited:
+                    print('Already visited')
+                else:
+                    new_path = list(path)
+                    new_path.append(traversal_graph[room][exit])
+                    queue.append(new_path)
+
 
 def reverse_direction(direction):
     if direction == 'n':
@@ -71,8 +98,18 @@ while True:
             break
 
     if len(traversed_rooms) < len(world.rooms) and all_explored == True:
-        player.travel(reverse_direction(last_direction))
-        traversal_path.append(reverse_direction(last_direction))
+        # Perform breadth-first search to find shortest path to room with unexplored exits
+        path = bfs(player.current_room.id)
+        print(f'Breadth-first search returned: {path}')
+
+        for i in path:
+            key_list = list(traversal_graph[player.current_room.id].keys()) 
+            val_list = list(traversal_graph[player.current_room.id].values())
+
+            player.travel(key_list[val_list.index(i)])
+            traversal_path.append(key_list[val_list.index(i)])
+
+        continue
 
     else:
         valid_dir = False
@@ -94,8 +131,8 @@ while True:
         traversal_graph[next_room_id][reverse_direction(dir_to_travel)] = room_id
 
 
-print(traversal_graph)
-print(traversal_path)
+print(f'\n \n{traversal_graph}')
+print(f'{traversal_path}\n \n')
 
 
 # TRAVERSAL TEST
