@@ -73,7 +73,6 @@ def reverse_direction(direction):
     else:
         return 'Invalid direction'
 
-last_direction = ''
 
 while True:
     exits = player.current_room.get_exits()
@@ -123,7 +122,6 @@ while True:
         
         player.travel(dir_to_travel)
         traversal_path.append(dir_to_travel)
-        last_direction = dir_to_travel
 
         next_room_id = player.current_room.id
 
